@@ -11,6 +11,8 @@ radio.onReceivedNumber(function (receivedNumber) {
         LEDバイブ(50)
         basic.pause(50)
         LEDバイブ(50)
+    } else if (receivedNumber == 4) {
+        LEDバイブ(150)
     } else {
     	
     }
@@ -61,9 +63,11 @@ input.onButtonPressed(Button.B, function () {
 })
 function LED点灯 () {
     strip.setPixelColor((n + 0) % 4, neopixel.colors(NeoPixelColors.Red))
-    strip.setPixelColor((n + 1) % 4, neopixel.colors(NeoPixelColors.Green))
-    strip.setPixelColor((n + 2) % 4, neopixel.colors(NeoPixelColors.Yellow))
-    strip.setPixelColor((n + 3) % 4, neopixel.colors(NeoPixelColors.Blue))
+    strip.setPixelColor((n + 1) % 4, neopixel.colors(NeoPixelColors.Orange))
+    strip.setPixelColor((n + 2) % 4, neopixel.colors(NeoPixelColors.Green))
+    strip.setPixelColor((n + 3) % 4, neopixel.colors(NeoPixelColors.Yellow))
+    strip.setPixelColor((n + 4) % 4, neopixel.colors(NeoPixelColors.Blue))
+    strip.setPixelColor((n + 5) % 4, neopixel.colors(NeoPixelColors.Violet))
     strip.show()
     n += 1
 }
@@ -75,7 +79,7 @@ function バイブ (mS: number) {
 let n = 0
 let モード = 0
 let strip: neopixel.Strip = null
-strip = neopixel.create(DigitalPin.P1, 4, NeoPixelMode.RGB)
+strip = neopixel.create(DigitalPin.P1, 6, NeoPixelMode.RGB)
 strip.showColor(neopixel.colors(NeoPixelColors.Black))
 radio.setGroup(33)
 if (input.buttonIsPressed(Button.A)) {
