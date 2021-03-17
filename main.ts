@@ -118,9 +118,6 @@ basic.forever(function () {
         motoron = false
     }
     今回送信文字列 = ""
-    if (input.logoIsPressed()) {
-        今回送信文字列 = "" + 今回送信文字列 + "AB"
-    }
     if (モード != 1) {
         if (今回送信文字列 != "" || 前回送信文字列 != "") {
             radio.sendString(今回送信文字列)
