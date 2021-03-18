@@ -36,15 +36,6 @@ function ICON表示 (No: number) {
             `)
     }
 }
-input.onButtonPressed(Button.A, function () {
-    音量閾値 += -10
-    led.plotBarGraph(
-    音量閾値,
-    255
-    )
-    basic.pause(1000)
-    basic.clearScreen()
-})
 function モーターON () {
     pins.digitalWritePin(DigitalPin.P2, 1)
 }
@@ -73,15 +64,6 @@ radio.onReceivedString(function (receivedString) {
             モーターOFF()
         }
     }
-})
-input.onButtonPressed(Button.B, function () {
-    音量閾値 += 10
-    led.plotBarGraph(
-    音量閾値,
-    255
-    )
-    basic.pause(1000)
-    basic.clearScreen()
 })
 function モーターOFF () {
     pins.digitalWritePin(DigitalPin.P2, 0)
@@ -118,7 +100,7 @@ basic.forever(function () {
         motoron = false
     }
     今回送信文字列 = ""
-    if (input.pinIsPressed(TouchPin.P0)) {
+    if (input.buttonIsPressed(Button.A)) {
         今回送信文字列 = "" + 今回送信文字列 + "AB"
     }
     if (モード != 1) {
