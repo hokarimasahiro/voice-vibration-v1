@@ -5,7 +5,8 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "neopixel": "github:microsoft/pxt-neopixel#v0.7.3"
+        "neopixel": "github:microsoft/pxt-neopixel#v0.7.3",
+        "bit": "github:hokarimasahiro/pxt-bitoperation#690e01af2101578ae1e777726145d4e2dac45021"
     },
     "files": [
         "main.blocks",

@@ -1,113 +1,93 @@
 function LED消灯 () {
-    strip.showColor(neopixel.colors(NeoPixelColors.Black))
+    LED.showColor(neopixel.colors(NeoPixelColors.Black))
 }
-function ICON表示 (No: number) {
-    if (No == 1) {
+function ICON表示 (ICON番号: number) {
+    if (ICON番号 == 1) {
         basic.showLeds(`
-            . . # . .
-            . . # . .
-            # . # . #
-            . # # # .
-            . . # . .
+            . # # . .
+            # . . # .
+            # # # # .
+            # . . # .
+            # . . # .
             `)
-    } else if (No == 2) {
+    } else if (ICON番号 == 2) {
         basic.showLeds(`
-            . . # . .
-            . # # # .
-            # . # . #
-            . . # . .
-            . . # . .
-            `)
-    } else if (No == 3) {
-        basic.showLeds(`
-            . # . # .
-            # # # # #
-            # # # # #
-            . # # # .
-            . . # . .
+            # # # . .
+            # . . # .
+            # # # . .
+            # . . # .
+            # # # . .
             `)
     } else {
-        basic.showLeds(`
-            . . # . .
-            . # # # .
-            . . # . .
-            . # # # .
-            . . # . .
-            `)
+        basic.clearScreen()
     }
 }
+input.onButtonPressed(Button.A, function () {
+    radio.sendString("A")
+})
 function モーターON () {
     pins.digitalWritePin(DigitalPin.P2, 1)
 }
+function コマンド処理 (コマンド: string) {
+    if (コマンド.includes("A")) {
+        モーターON()
+        LED点灯()
+        ICON表示(1)
+    } else if (コマンド.includes("B")) {
+        モーターON()
+        LED点灯()
+        ICON表示(2)
+    }
+    動作中 = true
+    終了時刻 = input.runningTime() + 動作時間
+}
+input.onGesture(Gesture.Shake, function () {
+    LED消灯()
+    モーターOFF()
+    動作中 = false
+})
 function LED点灯 () {
-    strip.setPixelColor((input.runningTime() / 200 + 0) % 4, neopixel.colors(NeoPixelColors.Red))
-    strip.setPixelColor((input.runningTime() / 200 + 1) % 4, neopixel.colors(NeoPixelColors.Orange))
-    strip.setPixelColor((input.runningTime() / 200 + 2) % 4, neopixel.colors(NeoPixelColors.Green))
-    strip.setPixelColor((input.runningTime() / 200 + 3) % 4, neopixel.colors(NeoPixelColors.Yellow))
-    strip.show()
+    LED.setPixelColor((input.runningTime() / 200 + 0) % 4, neopixel.colors(NeoPixelColors.Red))
+    LED.setPixelColor((input.runningTime() / 200 + 1) % 4, neopixel.colors(NeoPixelColors.Orange))
+    LED.setPixelColor((input.runningTime() / 200 + 2) % 4, neopixel.colors(NeoPixelColors.Green))
+    LED.setPixelColor((input.runningTime() / 200 + 3) % 4, neopixel.colors(NeoPixelColors.Yellow))
+    LED.show()
 }
 input.onButtonPressed(Button.AB, function () {
-    strip.showColor(neopixel.colors(NeoPixelColors.Black))
-    モーターOFF()
-    ICON表示(モード)
+    serial.writeLine("" + control.deviceName() + "," + bit.numberToHex(control.deviceSerialNumber()))
 })
 radio.onReceivedString(function (receivedString) {
-    if (receivedString.includes("A")) {
-        LED点灯()
-    } else {
-        LED消灯()
-    }
-    if (モード != 2) {
-        if (receivedString.includes("B")) {
-            モーターON()
-        } else {
-            モーターOFF()
-        }
-    }
+    QUEUE.push(receivedString)
+})
+input.onButtonPressed(Button.B, function () {
+    radio.sendString("B")
 })
 function モーターOFF () {
     pins.digitalWritePin(DigitalPin.P2, 0)
 }
-let 前回送信文字列 = ""
-let 今回送信文字列 = ""
-let motoron = false
-let モード = 0
-let 音量閾値 = 0
-let strip: neopixel.Strip = null
-strip = neopixel.create(DigitalPin.P1, 4, NeoPixelMode.RGB)
+let QUEUE: string[] = []
+let 動作中 = false
+let 終了時刻 = 0
+let 動作時間 = 0
+let LED: neopixel.Strip = null
+LED = neopixel.create(DigitalPin.P1, 4, NeoPixelMode.RGB)
 LED消灯()
 radio.setGroup(33)
-if (input.buttonIsPressed(Button.A)) {
-    音量閾値 = 255
-    モード = 1
-} else if (input.buttonIsPressed(Button.B)) {
-    音量閾値 = 128
-    モード = 2
-} else {
-    音量閾値 = 128
-    モード = 0
-}
-radio.setGroup(33)
-ICON表示(モード)
-while (input.buttonIsPressed(Button.A) || input.buttonIsPressed(Button.B)) {
-	
-}
+動作時間 = 200
+終了時刻 = input.runningTime()
+動作中 = false
+serial.redirectToUSB()
+QUEUE = []
+basic.showIcon(IconNames.Heart)
 basic.forever(function () {
-    let motorlimit = 0
-    if (motoron && input.runningTime() > motorlimit) {
+    if (QUEUE.length > 0) {
+        コマンド処理(QUEUE[0])
+        QUEUE.shift()
+    }
+    if (動作中 && input.runningTime() > 終了時刻) {
         モーターOFF()
         LED消灯()
-        motoron = false
+        動作中 = false
     }
-    今回送信文字列 = ""
-    if (input.buttonIsPressed(Button.A)) {
-        今回送信文字列 = "" + 今回送信文字列 + "AB"
-    }
-    if (モード != 1) {
-        if (今回送信文字列 != "" || 前回送信文字列 != "") {
-            radio.sendString(今回送信文字列)
-            前回送信文字列 = 今回送信文字列
-        }
-    }
-    basic.pause(0 / 10)
+    basic.pause(10)
 })
